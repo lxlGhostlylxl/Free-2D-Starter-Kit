@@ -4,11 +4,18 @@ using UnityEngine;
 
 public class PlayerControls : MonoBehaviour
 {
-    [SerializeField]
-   
-    float speed;
+
     Rigidbody2D rb;
     Controls controls;
+    Animator anim;
+    SpriteRenderer rend;
+
+    [SerializeField]
+    float speed;
+    Vector2 m_speed;
+    bool facingRight;
+
+
 
     private void Awake()
     {
@@ -17,10 +24,34 @@ public class PlayerControls : MonoBehaviour
         controls.GamePlay.Move.canceled += ctx => StopMove();
         controls.GamePlay.Jump.started += ctx => Jump();
 
+        rend = GetComponent<SpriteRenderer>();
+        anim = GetComponent<Animator>();
         rb = GetComponent<Rigidbody2D>();
     }
 
+    private void Update()
+    {
+        rb.velocity = new Vector2(m_speed.x, m_speed.y);
+      
 
+        if(m_speed.y > 0)
+        {
+            anim.SetBool("movingUp", true);
+        }
+        else if (m_speed.y <  0)
+        {
+            anim.SetBool("movingDown", true);
+        }
+        else if (m_speed.x > 0)
+        {
+            anim.SetBool("movingRight", true);
+        }
+        else if (m_speed.x < 0)
+        {
+            anim.SetBool("movingLeft", true);
+        }
+
+    }
 
     void Jump()
     {
@@ -29,14 +60,31 @@ public class PlayerControls : MonoBehaviour
 
     private void Move(Vector2 direction)
     {
-        rb.velocity = new Vector2((direction.x * speed), rb.velocity.y);
+        m_speed = new Vector2(direction.x * speed, direction.y * speed);
     }
 
     void StopMove()
     {
-        rb.velocity = Vector2.zero;
+        anim.SetBool("movingUp", false);
+        anim.SetBool("movingDown", false);
+        anim.SetBool("movingLeft", false);
+        anim.SetBool("movingRight", false);
+        m_speed = Vector2.zero;
     }
 
+    void Flip()
+    {
+        if (facingRight)
+        {
+            rend.flipX = true;
+            facingRight = false;
+        }
+        else
+        {
+            rend.flipX = false;
+            facingRight = true;
+        }
+    }
 
     private void OnEnable()
     {
